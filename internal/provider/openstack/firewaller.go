@@ -113,6 +113,9 @@ type Firewaller interface {
 
 	// InstanceIngressRules returns the ingress rules applied to the specified  instance.
 	InstanceIngressRules(ctx envcontext.ProviderCallContext, inst instances.Instance, machineID string) (firewall.IngressRules, error)
+
+	// GetFirewallMode returns value of "firewall-mode" config.
+	GetFirewallMode() (string)
 }
 
 type firewallerFactory struct{}
@@ -125,6 +128,11 @@ func (f *firewallerFactory) GetFirewaller(env environs.Environ) Firewaller {
 type firewallerBase struct {
 	environ          *Environ
 	ensureGroupMutex sync.Mutex
+}
+
+// GetFirewallMode returns value of "firewall-mode" config.
+func (c *firewallerBase) GetFirewallMode() (string) {
+	return c.environ.Config().FirewallMode()
 }
 
 // GetSecurityGroups implements Firewaller interface.

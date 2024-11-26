@@ -1123,12 +1123,14 @@ func (e *Environ) startInstance(
 		networks = append(networks, nova.ServerNetworks{PortId: pt.PortId})
 	}
 
+	// BUG 2088186: openstack: honor firewall-mode
+	createSecurityGroups := e.firewaller.GetFirewallMode() != config.FwNone
+
 	// For BUG 1680787: openstack: add support for neutron networks where port
 	// security is disabled.
 	// If any network specified for instance boot has PortSecurityEnabled equals
 	// false, don't create security groups, instance boot will fail.
-	createSecurityGroups := true
-	if len(networks) > 0 && e.supportsNeutron() {
+	if createSecurityGroups && len(networks) > 0 && e.supportsNeutron() {
 		neutronClient := e.neutron()
 		for _, n := range networks {
 			if n.NetworkId == "" {
